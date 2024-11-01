@@ -7,7 +7,7 @@ artifacts/
 ScaffoldingReadMe.txt
 
 # Configuration files
-appsettings.json
+#appsettings.json
 appsettings.*.json
 
 # User-specific files
@@ -51,3 +51,7 @@ yarn-error.log
 # Publish output
 publish/
 out/
+
+# Test results
+TestResults/
+coverage-report/
