@@ -1,21 +1,36 @@
+using Microsoft.Extensions.FileProviders;
+
 public class StaticFileService
 {
-    private readonly StaticFileConfiguration _config;
+    public StaticFileConfiguration Config { get; private set; }
 
-    public StaticFileService(StaticFileConfiguration config)
+    public StaticFileService(IConfiguration configuration)
     {
-        _config = config;
+        Config = configuration.GetSection("StaticFiles").Get<StaticFileConfiguration>() ?? new StaticFileConfiguration();
+
+        if (Config == null || string.IsNullOrEmpty(Config.RootPath))
+        {
+            throw new InvalidOperationException("Server is not configured properly! Please check the configuration.");
+        }
+    }
+
+    public IFileProvider GetFileProvider()
+    {
+        return new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), Config.RootPath))
+        {
+            UsePollingFileWatcher = true
+        };
     }
 
     public async Task ServeFile(HttpContext context)
     {
         var path = context.Request.Path.Value?.Trim('/') ?? string.Empty;
-        var rootPath = Path.Combine(Directory.GetCurrentDirectory(), _config.RootPath, path);
+        var rootPath = Path.Combine(Directory.GetCurrentDirectory(), Config.RootPath, path);
         string? fileToServe = null;
 
         if (Directory.Exists(rootPath))
         {
-            foreach (var defaultFile in _config.DefaultFiles)
+            foreach (var defaultFile in Config.DefaultFiles)
             {
                 var defaultFilePath = Path.Combine(rootPath, defaultFile);
                 if (File.Exists(defaultFilePath))
