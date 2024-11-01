@@ -51,3 +51,7 @@ yarn-error.log
 # Publish output
 publish/
 out/
+
+# Test results
+TestResults/
+coverage-report/
